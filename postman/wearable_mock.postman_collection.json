@@ -1,0 +1,31 @@
+{
+  "info": {
+    "name": "Wearable Mock API (Lab 2)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get daily activity",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Authorization", "value": "Bearer demo-token" }],
+        "url": {
+          "raw": "{{baseUrl}}/v1/users/me/activity/daily?days=7",
+          "host": ["{{baseUrl}}"],
+          "path": ["v1", "users", "me", "activity", "daily"],
+          "query": [{ "key": "days", "value": "7" }]
+        }
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "status": "OK",
+          "code": 200,
+          "header": [{ "key": "Content-Type", "value": "application/json" }],
+          "body": "{\"source\":\"MockFit\",\"data\":[{\"date\":\"2026-10-24\",\"steps\":8421,\"activeEnergyKcal\":312},{\"date\":\"2026-10-25\",\"steps\":10233,\"activeEnergyKcal\":455}]}"
+        }
+      ]
+    }
+  ],
+  "variable": [{ "key": "baseUrl", "value": "https://mock.wearable.api" }]
+}
