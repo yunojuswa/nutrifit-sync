@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'meal_log.dart';
 import 'wearable_service.dart';
@@ -43,47 +46,50 @@ class _DashboardPageState extends State<DashboardPage> {
     final watch = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Choose a watch',
-                    style: Theme.of(context).textTheme.titleLarge),
-                const SizedBox(height: 4),
-                const Text(
-                    'Select a demo device to connect and sync activity.'),
-                const SizedBox(height: 12),
-                for (final watch in _watches)
-                  RadioListTile<String>(
-                    contentPadding: EdgeInsets.zero,
-                    value: watch,
-                    groupValue: candidate,
-                    onChanged: (value) =>
-                        setSheetState(() => candidate = value),
-                    secondary: const Icon(Icons.watch),
-                    title: Text(watch),
-                    subtitle: Text(watch == widget.connectedWatch
-                        ? 'Currently connected'
-                        : 'Demo device'),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Choose a watch',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 4),
+                  const Text(
+                      'Select a demo device to connect and sync activity.'),
+                  const SizedBox(height: 12),
+                  for (final watch in _watches)
+                    RadioListTile<String>(
+                      contentPadding: EdgeInsets.zero,
+                      value: watch,
+                      groupValue: candidate,
+                      onChanged: (value) =>
+                          setSheetState(() => candidate = value),
+                      secondary: const Icon(Icons.watch),
+                      title: Text(watch),
+                      subtitle: Text(watch == widget.connectedWatch
+                          ? 'Currently connected'
+                          : 'Demo device'),
+                    ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: candidate == null
+                          ? null
+                          : () => Navigator.pop(context, candidate),
+                      icon: const Icon(Icons.sync),
+                      label: Text(candidate == widget.connectedWatch
+                          ? 'Sync this watch'
+                          : 'Connect & sync'),
+                    ),
                   ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: candidate == null
-                        ? null
-                        : () => Navigator.pop(context, candidate),
-                    icon: const Icon(Icons.sync),
-                    label: Text(candidate == widget.connectedWatch
-                        ? 'Sync this watch'
-                        : 'Connect & sync'),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -134,7 +140,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   child: ListTile(
                     leading: const Icon(Icons.watch, color: Color(0xFF169C91)),
                     title: Text(widget.connectedWatch!),
-                    subtitle: const Text('Demo connection · MockFit activity data'),
+                    subtitle:
+                        const Text('Demo connection · MockFit activity data'),
                     trailing: const Icon(Icons.check_circle,
                         color: Color(0xFF169C91)),
                   ),
@@ -165,6 +172,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   color: const Color(0xFFFFB703),
                 ),
                 const SizedBox(height: 12),
+                const _HeartRateMonitor(),
+                const SizedBox(height: 12),
                 Card(
                   child: ListTile(
                     leading: const Icon(Icons.restaurant_menu),
@@ -184,6 +193,131 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
     );
   }
+}
+
+class _HeartRateMonitor extends StatefulWidget {
+  const _HeartRateMonitor();
+
+  @override
+  State<_HeartRateMonitor> createState() => _HeartRateMonitorState();
+}
+
+class _HeartRateMonitorState extends State<_HeartRateMonitor> {
+  final _random = Random();
+  final List<int> _readings = [72, 72, 73, 71, 74, 73, 72, 75, 73, 72, 74, 72];
+  late int _bpm = _readings.last;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 2), (_) {
+      final next = (_bpm + _random.nextInt(7) - 3).clamp(62, 96).toInt();
+      setState(() {
+        _bpm = next;
+        _readings.add(next);
+        if (_readings.length > 24) _readings.removeAt(0);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.favorite, color: Color(0xFFE45757)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text('Heart rate',
+                        style: Theme.of(context).textTheme.titleMedium),
+                  ),
+                  const Icon(Icons.circle, size: 9, color: Color(0xFF2EC4B6)),
+                  const SizedBox(width: 6),
+                  Text('DEMO', style: Theme.of(context).textTheme.labelSmall),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text('$_bpm',
+                      style: Theme.of(context).textTheme.headlineLarge),
+                  const Padding(
+                    padding: EdgeInsets.only(left: 6, bottom: 7),
+                    child: Text('bpm'),
+                  ),
+                  const Spacer(),
+                  Text('Simulated live reading',
+                      style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 54,
+                width: double.infinity,
+                child: CustomPaint(
+                  painter: _HeartRatePainter(List<int>.of(_readings)),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Demo only · not connected to a real heart rate sensor',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      );
+}
+
+class _HeartRatePainter extends CustomPainter {
+  const _HeartRatePainter(this.readings);
+
+  final List<int> readings;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (readings.length < 2) return;
+    const minReading = 60;
+    const maxReading = 100;
+    final range = maxReading - minReading;
+    final path = Path();
+
+    for (var i = 0; i < readings.length; i++) {
+      final x = size.width * i / (readings.length - 1);
+      final y =
+          size.height - ((readings[i] - minReading) / range) * size.height;
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFE45757)
+        ..strokeWidth = 2.5
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeartRatePainter oldDelegate) => true;
 }
 
 class _WeeklyStepsChart extends StatelessWidget {
