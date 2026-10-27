@@ -1,0 +1,16 @@
+name: nutrifit_sync
+description: Lab 2 - meal tracking, photo logging and wearable sync (mock REST API).
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+  image_picker: ^1.1.2
+
+flutter:
+  uses-material-design: true
