@@ -37,13 +37,8 @@ class _HomeShellState extends State<HomeShell> {
   String? _connectedWatch;
   int _tab = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _sync();
-  }
-
   Future<void> _sync() async {
+    if (_connectedWatch == null) return;
     setState(() {
       _loading = true;
       _error = null;

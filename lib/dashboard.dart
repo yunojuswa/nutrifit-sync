@@ -185,8 +185,16 @@ class _DashboardPageState extends State<DashboardPage> {
                 const SizedBox(height: 20),
                 _WeeklyStepsChart(days: widget.days),
               ] else if (!widget.loading)
-                const Text(
-                    'No activity yet. Tap Sync watch to choose a demo watch and load activity.'),
+                Card(
+                  child: ListTile(
+                    leading:
+                        const Icon(Icons.watch, color: Color(0xFF169C91)),
+                    title: const Text('No activity data yet'),
+                    subtitle: Text(widget.connectedWatch == null
+                        ? 'Connect a demo watch with Sync watch to load your steps, active energy, and heart rate.'
+                        : 'No activity was returned. Try syncing your connected demo watch again.'),
+                  ),
+                ),
             ],
           ),
         ),
